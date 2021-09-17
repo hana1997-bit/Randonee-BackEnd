@@ -67,7 +67,7 @@ const fileFilterFunction = (req, file, cb) => {
 // 2.0 create upload
 const upload = multer({ storage: my_storage, fileFilter: fileFilterFunction })
 
-//creat all user
+// creat all user
 router.post('/singup', upload.single('file'), async (req, res) => {
     try {
         const user = await User.findOne();
