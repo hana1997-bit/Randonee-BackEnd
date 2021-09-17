@@ -2,10 +2,10 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 const userSchema = new Schema({
-   // image: {
-   //    type: String,
-   //    required: true,
-   // },
+   image: {
+      type: String,
+      required: true,
+   },
    firstName: {
       type: String,
       required: true,
