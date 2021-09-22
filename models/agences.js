@@ -1,12 +1,16 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
-
 const agentSchema = new Schema({
+   user: {
+       type: mongoose.Schema.Types.ObjectId,
+        ref: "User", 
+        required: true, 
+      },
    images: {
       type: Array[String],
       required: true,
    },
-   name: {
+   evenement: {
       type: String,
       required: true,
    },
@@ -14,13 +18,8 @@ const agentSchema = new Schema({
       type: String,
       required: true,
    },
-   email: {
-      type: String,
-      required: true,
-      unique: true,
-   },
-   password: {
-      type: String,
+   durée: {
+      type: Number,
       required: true,
    },
    telephone: {

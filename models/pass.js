@@ -1,23 +1,30 @@
-const mongoose = require('mongoose');
-const { Schema } = mongoose;
 
-const passwordSchema = new Schema({
-   email: {
+const mongoose = require("mongoose");
+const Schema = mongoose.Schema;
+const tokenSchema = new Schema({
+   token: {
       type: String,
       required: true,
-      unique: true,
-   }
-}, {
-   versionKey: false, // paramétre pour mongodb , désactivier _v on mongoDB
-   timestamps: true // temps de create et temps de modifier (creatAT,updateAT)
-
+  },
+  email: {
+      type: String,
+      required: true,
+  },
+  created: {
+      type: Date,
+      default: () => Date.now(),
+  },
+  // will automatically delete after 10 min
+  // can be a bit delay, because the bg thread runs every 60 sec
+  expire_at: { type: Date, default: Date.now, expires: 600 }
 });
+module.exports = mongoose.model("Token", tokenSchema);
 
 
 
 
 // creation de model
-const Pass = mongoose.model('pass', passwordSchema);
+const Pass = mongoose.model('pass', tokenSchema);
 
 module.exports = Pass;
 

@@ -4,6 +4,8 @@ const bcrypt = require('bcrypt');
 const multer = require('multer');
 const path = require('path');
 const jwt = require('jsonwebtoken');
+const Token = require('../models/pass');
+const crypto = require("crypto");
 const fs = require('fs');
 const Transporter = require('../utils/transporter');
 
@@ -12,7 +14,7 @@ const User = require('../models/users');
 const Pass = require('../models/users');
 
 const passport = require('passport');
-const { getMaxListeners } = require('process');
+// const { getMaxListeners } = require('process');
 
 // get all user
 router.get('/users', passport.authenticate('bearer', { session: false }), async (req, res) => {
@@ -40,7 +42,7 @@ router.get('/users/:id', async (req, res) => {
 
 const my_storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, './public/avatars')
+        cb(null, './public/images')
     },
 
     filename: (req, file, cb) => {
@@ -70,20 +72,39 @@ const upload = multer({ storage: my_storage, fileFilter: fileFilterFunction })
 // creat all user
 router.post('/singup', upload.single('file'), async (req, res) => {
     try {
-        const user = await User.findOne();
+        const user = await User.find({ email: req.body.email });
         const hashpassword = await bcrypt.hash(req.body.password, 10);
         console.log(hashpassword);
-        console.log(user);
-        const creatUser = await User.create({
-            firstName: req.body.firstName,
-            lastName: req.body.lastName,
-            age: req.body.age,
-            email: req.body.email,
-            phone: req.body.phone,
-            image: req.file,
-            password: hashpassword
-        });
-        res.json(creatUser);
+        if (!user) {
+            res.json({ message: "mail existe" })
+        }
+        // const token = JWT.sign({ id: user._id }, JWTSecret);
+        else {
+            if (req.file) {
+                const creatUser = await User.create({
+                    firstName: req.body.firstName,
+                    lastName: req.body.lastName,
+                    age: req.body.age,
+                    email: req.body.email,
+                    phone: req.body.phone,
+                    image: req.file.path ,
+                    password: hashpassword
+                }); res.json(creatUser);
+            }
+            else{
+                const creatUser = await User.create({
+                    firstName: req.body.firstName,
+                    lastName: req.body.lastName,
+                    age: req.body.age,
+                    email: req.body.email,
+                    phone: req.body.phone,
+                    password: hashpassword
+                }); res.json(creatUser); 
+            }
+
+        }
+
+
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: "internal server error!" })
@@ -120,46 +141,128 @@ router.post('/singin', async (req, res) => {
         res.status(500).json({ message: "internal server error!" })
     }
 });
-// //forget password 
-// router.post('/sendmailV2', async (req, res) => {
-//     try {
-//         const pass = Pass.findOne({ email: req.body.email });
-//         console.log(pass)
-//         if (!user) {
-//             res.json({ message: "this email isn't exist" });
-//         }
-//         else {
-//             //  creat mail option
-//             const mailoption = {
-//                 from: process.env.MAIL, // sender address
-//                 to: req.body.email, // list of receivers
-//                 subject: "Hello ✔", // Subject line
-//                 // text: req.user.password, // text body
-              
-//             };
-//             console.log(req.user.password);
-//             //  send mail
-//             const info = await Transporter.sendMail(mailoption)
-//             res.json({ message: 'check your mail' });
-//         }
-
-//     } catch (error) {
-//         console.log(error);
-//         res.status(500).json({ message: 'internal server error' });
-//     }
-// });
-
-//update user
-router.put('/users/:id', async (req, res) => {
+//forget password 
+router.post('/sendmailV2', async (req, res) => {
+    const clientURL="http://localhost:3000"
     try {
-        const users = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        res.json(user);
+        const user = await User.findOne({ email: req.body.email });
+        if (!user) {
+            res.json({ message: "this email isn't exist" });
+        }
+        const token = await Token.findOne({ userId: user._id });
+        if (token) {
+            await token.deleteOne()
+        };
+        const resetToken = crypto.randomBytes(32).toString("hex");
+        console.log(resetToken);
+        const hash = await bcrypt.hash(resetToken, 10);
+        await new Token({
+            userId: user._id,
+            token: hash,
+            createdAt: Date.now(),
+        })
+        console.log("token " + hash);
+        
+        const link = `${clientURL}/passwordReset?token=${resetToken}&id=${user._id}`;
+        const mailoption = {
+            from: process.env.MAIL, // sender address
+            to: "idoudihana06@gmail.com", // list of receivers
+            subject: "Hello ✔", // Subject line
+            html: link, // html body
+        }
+         const info = await Transporter.sendMail(mailoption)
+        res.json({ message: 'check your mail' });
+        const resetPassword = async (userId, token, password) => {
+            let passwordResetToken = await Token.findOne({ userId });
+            if (!passwordResetToken) {
+              throw new Error("Invalid or expired password reset token");
+            }
+            const isValid = await bcrypt.compare(token, passwordResetToken.token);
+            if (!isValid) {
+              throw new Error("Invalid or expired password reset token");
+            }
+            const hash = await bcrypt.hash(password, Number(bcryptSalt));
+            await User.updateOne(
+              { _id: userId },
+              { $set: { password: hash } },
+              { new: true }
+            );
+            const user = await User.findById({ _id: userId });
+            const info = await Transporter.sendMail(mailoption)
+             res.json({ message: 'check your mail' });
+           
+            await passwordResetToken.deleteOne();
+            return true;
+          };
     } catch (error) {
         console.log(error);
-        res.status(500).json({ message: "error to update user!" })
+        res.status(500).json({ message: 'internal server error' });
     }
-
 });
+
+//update user
+router.put('/users/:id', upload.single('file'), async (req, res) => {
+            try {
+              const hashpassword = await bcrypt.hash(req.body.password, 10);
+              const userCompte = await User.findById(req.params.id);
+              if (userCompte && req.file) {
+                const user = await User.findByIdAndUpdate(
+                  req.params.id,
+                  {
+                    firstName: req.body.firstName,
+                    lastName: req.body.lastName,
+                    age: req.body.age,
+                    email: req.body.email,
+                    phone: req.body.phone,
+                    image: req.file.path ,
+                    password: hashpassword
+                  },
+                  {
+                    new: true,
+                  }
+                );
+                // this is for removing old image after updating
+                try {
+                  fs.unlinkSync(userCompte.image);
+                  //file removed
+                } catch (err) {
+                  console.error(err);
+                }
+                res.json({
+                  message: "user has been updated .",
+                  newUserInfos: user,
+                });
+              } else if (UserCompte && req.file == undefined) {
+                const user = await User.findByIdAndUpdate(
+                  req.params.id,
+                  {
+                    firstName: req.body.firstName,
+                    lastName: req.body.lastName,
+                    age: req.body.age,
+                    email: req.body.email,
+                    phone: req.body.phone,
+                    password: hashpassword
+                  },
+                  {
+                    new: true,
+                  }
+                );
+                res.status(200).json({
+                  user: user,
+                });
+              } else {
+                res.status(404).json({
+                  message:
+                    " there is no user with this ID to update .please check ID again .",
+                });
+              }
+            } catch (error) {
+              console.log(error);
+              res.status(500).json({ message: "Internal server error!" });
+            }
+          });
+
+
 
 //delete user
 router.delete('/users/:id', async (req, res) => {
@@ -172,6 +275,38 @@ router.delete('/users/:id', async (req, res) => {
     }
 
 
+});
+// affect agent to  user 
+router.put("/agentUser/:iduser/:idagent", async (req, res) => {
+  try {
+    const user = await User.findByIdAndUpdate(
+      req.params.iduser,
+      { $push: { agents: req.params.idagent } },
+      {
+        new: true,
+      }
+    );
+    res.json(user);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error!" });
+  }
+});
+// desaffecte agent to user
+router.put("/desaagentUser/:iduser/:idagent", async (req, res) => {
+  try {
+    const user = await User.findByIdAndUpdate(
+      req.params.iduser,
+      { $pull: { agents: req.params.idagent } },
+      {
+        new: true,
+      }
+    );
+    res.json(user);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error!" });
+  }
 });
 
 
