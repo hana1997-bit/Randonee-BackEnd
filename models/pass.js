@@ -1,30 +1,22 @@
-
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
+
 const tokenSchema = new Schema({
-   token: {
-      type: String,
-      required: true,
-  },
-  email: {
-      type: String,
-      required: true,
-  },
-  created: {
-      type: Date,
-      default: () => Date.now(),
-  },
-  // will automatically delete after 10 min
-  // can be a bit delay, because the bg thread runs every 60 sec
-  expire_at: { type: Date, default: Date.now, expires: 600 }
+    userId: {
+        type: Schema.Types.ObjectId,
+        required: true,
+        ref: "user",
+    },
+    token: {
+        type: String,//85 char3 falestin tounes bilvidaires
+        required: true,
+    },
+    versionKey: false, // paramétre pour mongodb , désactivier _v on mongoDB
+    timestamps: false // temps de create et temps de modifier (creatAT,updateAT)
+
 });
-module.exports = mongoose.model("Token", tokenSchema);
 
 
 
-
-// creation de model
-const Pass = mongoose.model('pass', tokenSchema);
-
-module.exports = Pass;
-
+const Token = mongoose.model("token", tokenSchema);
+module.exports = Token;

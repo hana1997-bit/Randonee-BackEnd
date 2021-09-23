@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const multer= require('multer');
 const Agent = require('../models/agences');
 
 // get all agents
@@ -55,7 +56,7 @@ const fileFilterFunction = (req, file, cb) => {
 const upload = multer({ storage: my_storage, fileFilter: fileFilterFunction })
 
 // creat events
-router.post('/creation', upload.Array('files'), async (req, res) => {
+router.post('/creation', upload.single('files'), async (req, res) => {
     try {
         const agent = await Agent.find({ email: req.body.email });
         if (!agent) {
@@ -73,7 +74,7 @@ router.post('/creation', upload.Array('files'), async (req, res) => {
     }
 });
 //update Agent
-router.put('/agents/:id', upload.Array('files'), async (req, res) => {
+router.put('/agents/:id', upload.single('files'), async (req, res) => {
     try {
         const agent = await Agent.findByIdAndUpdate(req.params.id, req.body, { new: true });
         res.json(agent);

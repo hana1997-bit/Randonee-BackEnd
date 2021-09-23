@@ -2,12 +2,12 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 const agentSchema = new Schema({
    user: {
-       type: mongoose.Schema.Types.ObjectId,
-        ref: "User", 
-        required: true, 
-      },
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+   },
    images: {
-      type: Array[String],
+      type: String,
       required: true,
    },
    evenement: {
@@ -29,7 +29,7 @@ const agentSchema = new Schema({
    },
 }, {
    versionKey: false, // paramétre pour mongodb , désactivier _v on mongoDB
-   timestamps: true // temps de create et temps de modifier (creatAT,updateAT)
+   timestamps: false // temps de create et temps de modifier (creatAT,updateAT)
 
 });
 
