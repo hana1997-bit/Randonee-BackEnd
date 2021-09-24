@@ -1,26 +1,18 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
-const agentSchema = new Schema({
-   agent: {
+const reserveSchema = new Schema({
+   user: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Agent",
       required: true,
    },
-   images: {
-      type: String,
-      required: true,
+   nom:{
+    type: String,
+    required: true,
    },
-   evenement: {
-      type: String,
-      required: true,
-   },
-   localisation: {
-      type: String,
-      required: true,
-   },
-   durée: {
-      type: Number,
-      required: true,
+   prenom:{
+    type: String,
+    required: true,
    },
    telephone: {
       type: Number,
@@ -35,8 +27,8 @@ const agentSchema = new Schema({
 
 
 // creation de model
-const Agent = mongoose.model('agent', agentSchema);
+const Reserve = mongoose.model('reserve', reserveSchema);
 
 
 
-module.exports = Agent;
+module.exports =Reserve;

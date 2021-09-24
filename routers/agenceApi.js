@@ -99,7 +99,39 @@ router.delete('/agents/:id', async (req, res) => {
 
 });
 
-
+// affect reserve to  agent
+router.put("/agentreserve/:idagent/:idreserve", async (req, res) => {
+    try {
+      const agent = await Agent.findByIdAndUpdate(
+        req.params.idagent,
+        { $push: { reserve: req.params.idreserve } },
+        {
+          new: true,
+        }
+      );
+      res.json(agent);
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ message: "Internal server error!" });
+    }
+  });
+  // desaffecte reserve to agent
+  router.put("/desaagentreserve/:idreserve/:idagent", async (req, res) => {
+    try {
+        const agent = await Agent.findByIdAndUpdate(
+            req.params.idagent,
+            { $push: { reserve: req.params.idreserve } },
+            {
+              new: true,
+            }
+          );
+      res.json(agent);
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ message: "Internal server error!" });
+    }
+  });
+  
 
 
 

@@ -1,6 +1,7 @@
 const express = require('express');
 const morgan = require('morgan');
 const dotenv = require('dotenv');
+const cors = require('cors');
 
 // configuration de dotenv
 dotenv.config();
@@ -21,6 +22,8 @@ app.use(morgan('dev'));
 // body parser
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+// cors
+app.user(cors());
 
 // user Api
 const user = require('./routers/userApi');
@@ -31,6 +34,9 @@ app.use('',agent);
 //reset Api
 const reset = require('./routers/ResetPassApi');
 app.use('',reset);
+//reserve Api
+const reserve = require('./routers/reserveApi');
+app.use('',reserve);
 app.listen(port, () => {
     console.log(`application listening at http://localhost: ${port}`);
 })

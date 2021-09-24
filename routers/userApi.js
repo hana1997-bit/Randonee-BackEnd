@@ -11,7 +11,6 @@ const Transporter = require('../utils/transporter');
 
 //use model
 const User = require('../models/users');
-const Pass = require('../models/users');
 
 const passport = require('passport');
 // const { getMaxListeners } = require('process');
@@ -88,7 +87,8 @@ router.post('/singup', upload.single('file'), async (req, res) => {
           email: req.body.email,
           phone: req.body.phone,
           image: req.file.path,
-          password: hashpassword
+          password: hashpassword,
+          role: req.body.role
         }); res.json(creatUser);
       }
       else {
@@ -98,7 +98,8 @@ router.post('/singup', upload.single('file'), async (req, res) => {
           age: req.body.age,
           email: req.body.email,
           phone: req.body.phone,
-          password: hashpassword
+          password: hashpassword,
+          role: req.body.role
         }); res.json(creatUser);
       }
 
@@ -157,7 +158,8 @@ router.put('/users/:id', upload.single('file'), async (req, res) => {
           email: req.body.email,
           phone: req.body.phone,
           image: req.file.path,
-          password: hashpassword
+          password: hashpassword,
+          role: req.body.role
         },
         {
           new: true,
@@ -183,7 +185,8 @@ router.put('/users/:id', upload.single('file'), async (req, res) => {
           age: req.body.age,
           email: req.body.email,
           phone: req.body.phone,
-          password: hashpassword
+          password: hashpassword,
+          role: req.body.role
         },
         {
           new: true,
