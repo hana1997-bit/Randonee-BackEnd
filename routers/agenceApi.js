@@ -1,136 +1,34 @@
 const express = require('express');
 const router = express.Router();
-const multer= require('multer');
-const Agent = require('../models/agences');
-
+const agentController= require('../Controllers/agenceController');
 // get all agents
-router.get('/agents', async (req, res) => {
-    try {
-        const agent = await Agent.find().populate('agents');;
-        res.json(agent);
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: "internal server error!" })
-    }
-});
+router.get('/agents',agentController.get);
 
 //get agent by id
-router.get('/agents/:id', async (req, res) => {
-    try {
-        const agent = await Agent.findById(req.params.id);
-        res.json(agent);
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: "no one have this id" })
-    }
-});
-// 1.0 create storage
-
-const my_storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, './public/images')
-    },
-
-    filename: (req, file, cb) => {
-        const file_extention = path.extname(file.originalname);
-        const uniqueSuffix = Date.now() + file_extention
-        console.log(file_extention)
-        cb(null, file.fieldname + '-' + uniqueSuffix)
-    },
-
-    limits: {
-        fileSize: 1024 * 1024
-    }
-});
-
-// file filter function 
-const fileFilterFunction = (req, file, cb) => {
-    const file_extention = path.extname(file.originalname);
-    const allowedExtentions = [".jpg", ".jpeg", ".png", ".gif"]
-    if (!allowedExtentions.includes(file_extention)) {
-        return cb(new Error('Only images are allowed'))
-    }
-    cb(null, true)
-};
-// 2.0 create upload
-const upload = multer({ storage: my_storage, fileFilter: fileFilterFunction })
+// router.get('/agents/:id', async (req, res) => {
+//     try {
+//         const agent = await Agent.findById(req.params.id);
+//         res.json(agent);
+//     } catch (error) {
+//         console.log(error);
+//         res.status(500).json({ message: "no one have this id" })
+//     }
+// });
 
 // creat events
-router.post('/creation', upload.single('files'), async (req, res) => {
-    try {
-        const agent = await Agent.find({ email: req.body.email });
-        if (!agent) {
-            res.json({ message: "mail existe" })
-        }
-        else {
-            const creat_agent = await Agent.create(req.body);
-            res.json(creat_agent);
-        }
-
-
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: "internal server error!" })
-    }
-});
+router.post('/creation',agentController.post );
 //update Agent
-router.put('/agents/:id', upload.single('files'), async (req, res) => {
-    try {
-        const agent = await Agent.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        res.json(agent);
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: "Internal server error!" });
-    }
-});
+router.put('/agents/:id',agentController.put);
 
 
 
 //delete agent
-router.delete('/agents/:id', async (req, res) => {
-    try {
-        const agent = await Agent.findByIdAndRemove(req.params.id);
-        res.json({ message: " agent has been deleted successfully" });
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: "internal server error!" })
-    }
-
-
-});
+router.delete('/agents/:id',agentController.delete);
 
 // affect reserve to  agent
-router.put("/agentreserve/:idagent/:idreserve", async (req, res) => {
-    try {
-      const agent = await Agent.findByIdAndUpdate(
-        req.params.idagent,
-        { $push: { reserve: req.params.idreserve } },
-        {
-          new: true,
-        }
-      );
-      res.json(agent);
-    } catch (error) {
-      console.log(error);
-      res.status(500).json({ message: "Internal server error!" });
-    }
-  });
+router.put("/agentreserve/:idagent/:idreserve",agentController.put);
   // desaffecte reserve to agent
-  router.put("/desaagentreserve/:idreserve/:idagent", async (req, res) => {
-    try {
-        const agent = await Agent.findByIdAndUpdate(
-            req.params.idagent,
-            { $push: { reserve: req.params.idreserve } },
-            {
-              new: true,
-            }
-          );
-      res.json(agent);
-    } catch (error) {
-      console.log(error);
-      res.status(500).json({ message: "Internal server error!" });
-    }
-  });
+  router.put("/desaagentreserve/:idreserve/:idagent",agentController.put);
   
 
 
