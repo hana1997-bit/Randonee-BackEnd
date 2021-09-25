@@ -23,7 +23,7 @@ app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 // cors
-app.user(cors());
+app.use(cors());
 
 // user Api
 const user = require('./routers/userApi');
