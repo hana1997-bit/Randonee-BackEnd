@@ -19,12 +19,12 @@ router.get('/users', userController.get)
 // });
 
 // creat all user
-router.post('/singup', userController.post)
+router.post('/singup', userController.create)
 // singin user
-router.post('/singin', userController.post);
+router.post('/singin', userController.login);
 
 //update user
-router.put('/users/:id', userController.put);
+router.put('/users/:id', userController.update);
 
 
 

@@ -11,8 +11,8 @@ const User = require('../models/users');
 
 const passport = require('passport');
 
-
-exports.get = passport.authenticate('bearer', { session: false }), async (req, res) => {
+// passport.authenticate('bearer', { session: false }),
+exports.get =  async (req, res) => {
     console.log(req.user);
     try {
         const user = await User.find();
@@ -54,7 +54,7 @@ const fileFilterFunction = (req, file, cb) => {
 // 2.0 create upload
 const upload = multer({ storage: my_storage, fileFilter: fileFilterFunction })
 // register
-exports.post = upload.single('file'), async (req, res) => {
+exports.create = upload.single('file'), async (req, res) => {
     try {
         const user = await User.find({ email: req.body.email });
         const hashpassword = await bcrypt.hash(req.body.password, 10);
@@ -97,7 +97,7 @@ exports.post = upload.single('file'), async (req, res) => {
     }
 }
 // login
-exports.post = async (req, res) => {
+exports.login = async (req, res) => {
     try {
         const user = await User.findOne({ email: req.body.email });
         if (user) {
@@ -128,7 +128,7 @@ exports.post = async (req, res) => {
     }
 }
 // upload user
-exports.put = upload.single('file'), async (req, res) => {
+exports.update = upload.single('file'), async (req, res) => {
     try {
         const hashpassword = await bcrypt.hash(req.body.password, 10);
         const userCompte = await User.findById(req.params.id);
