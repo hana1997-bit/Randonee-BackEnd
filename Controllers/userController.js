@@ -55,8 +55,10 @@ const fileFilterFunction = (req, file, cb) => {
 const upload = multer({ storage: my_storage, fileFilter: fileFilterFunction })
 // register
 exports.create = upload.single('file'), async (req, res) => {
+    console.log("hhh");
     try {
         const user = await User.find({ email: req.body.email });
+        console.log(user);
         const hashpassword = await bcrypt.hash(req.body.password, 10);
         console.log(hashpassword);
         if (!user) {
@@ -75,6 +77,8 @@ exports.create = upload.single('file'), async (req, res) => {
                     password: hashpassword,
                     role: req.body.role
                 }); res.json(creatUser);
+        console.log(creatUser);
+
             }
             else {
                 const creatUser = await User.create({
@@ -86,6 +90,8 @@ exports.create = upload.single('file'), async (req, res) => {
                     password: hashpassword,
                     role: req.body.role
                 }); res.json(creatUser);
+        console.log(creatUser);
+
             }
 
         }
@@ -120,12 +126,13 @@ exports.login = async (req, res) => {
 
         }
         else {
-            res.json({ message: "wrong email or password" });
+            res.json({ message: "user not exist" });
         }
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: "internal server error!" })
-    }
+    };
+
 }
 // upload user
 exports.update = upload.single('file'), async (req, res) => {

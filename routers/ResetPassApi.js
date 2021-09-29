@@ -4,6 +4,7 @@ const express=require('express');
 const Transporter = require("../utils/Transporter");
 const bcrypt=require('bcrypt')
 const router = express.Router();
+const crypto=require('crypto')
 
 router.post("/reset", async (req, res) => {
     const clientURL = "http://localhost:3000";

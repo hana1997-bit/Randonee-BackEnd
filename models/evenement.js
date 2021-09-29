@@ -22,7 +22,7 @@ const agentSchema = new Schema({
       type: Number,
       required: true,
    },
-   telephone: {
+  ephone: {
       type: Number,
       required: true,
       unique: true,
