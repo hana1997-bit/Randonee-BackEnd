@@ -30,12 +30,12 @@ router.post("/reset", async (req, res) => {
     const link = `${clientURL}/passwordReset?token=${resetToken}&id=${user._id}`;
     const mailoption = {
       from: process.env.MAIL, // jsoner address
-      to: "idoudihana06@gmail.com", // list of receivers
+      to: "idoudihana06@gmail.com" , // list of receivers
       subject: "Hello ✔", // Subject line
       html: link, // html body
     }
     const info = await Transporter.sendMail(mailoption)
-    res.json({ message: 'check your mail' });
+    res.json({ message: 'check your mail', userId , token});
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: 'internal server error' });
