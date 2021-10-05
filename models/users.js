@@ -31,6 +31,11 @@ const userSchema = new Schema({
       type: Number,
       required: true,
    },
+   role: {
+      type: String,
+      required: true,
+      default:"admin"
+   },
 }, {
    versionKey: false, // paramétre pour mongodb , désactivier _v on mongoDB
    timestamps: true // temps de create et temps de modifier (creatAT,updateAT)

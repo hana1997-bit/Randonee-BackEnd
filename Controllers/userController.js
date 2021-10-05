@@ -1,5 +1,3 @@
-const express = require('express');
-const router = express.Router();
 const bcrypt = require('bcrypt');
 const multer = require('multer');
 const path = require('path');
@@ -13,11 +11,8 @@ const User = require('../models/users');
 
 const passport = require('passport');
 
-
-// const { getMaxListeners } = require('process');
-
-// get all user
-router.get('/users', async (req, res) => {
+// passport.authenticate('bearer', { session: false }),
+exports.get =  async (req, res) => {
     console.log(req.user);
     try {
         const user = await User.find();
@@ -26,18 +21,10 @@ router.get('/users', async (req, res) => {
         console.log(error);
         res.status(500).json({ message: "internal server error!" })
     }
-})
+}
 
-//get user by id
-router.get('/users/:id', async (req, res) => {
-  try {
-    const user = await User.findById(req.params.id);
-    res.json(user);
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "no one have this id" })
-  }
-});
+// 1.0 create storage
+
 const my_storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, './public/images')
@@ -66,9 +53,8 @@ const fileFilterFunction = (req, file, cb) => {
 };
 // 2.0 create upload
 const upload = multer({ storage: my_storage, fileFilter: fileFilterFunction })
-
-// creat all user
-router.post('/singup',upload.single('file'), async (req, res) => {
+// register
+exports.create = upload.single('file'), async (req, res) => {
     console.log("hhh");
     try {
         const user = await User.find({ email: req.body.email });
@@ -91,6 +77,7 @@ router.post('/singup',upload.single('file'), async (req, res) => {
                     password: hashpassword,
                     role: req.body.role
                 }); res.json(creatUser);
+        console.log(creatUser);
 
             }
             else {
@@ -103,6 +90,7 @@ router.post('/singup',upload.single('file'), async (req, res) => {
                     password: hashpassword,
                     role: req.body.role
                 }); res.json(creatUser);
+        console.log(creatUser);
 
             }
 
@@ -113,9 +101,9 @@ router.post('/singup',upload.single('file'), async (req, res) => {
         console.log(error);
         res.status(500).json({ message: "internal server error!" })
     }
-})
-// singin user
-router.post('/singin',async (req, res) => {
+}
+// login
+exports.login = async (req, res) => {
     try {
         const user = await User.findOne({ email: req.body.email });
         if (user) {
@@ -145,10 +133,9 @@ router.post('/singin',async (req, res) => {
         res.status(500).json({ message: "internal server error!" })
     };
 
-})
-
-//update user
-router.put('/users/:id', upload.single('file'), async (req, res) => {
+}
+// upload user
+exports.update = upload.single('file'), async (req, res) => {
     try {
         const hashpassword = await bcrypt.hash(req.body.password, 10);
         const userCompte = await User.findById(req.params.id);
@@ -209,24 +196,9 @@ router.put('/users/:id', upload.single('file'), async (req, res) => {
         console.log(error);
         res.status(500).json({ message: "Internal server error!" });
     }
-});
-
-
-
-//delete user
-router.delete('/users/:id',async (req, res) => {
-    try {
-        const users = await User.findByIdAndRemove(req.params.id);
-        res.json({ message: " user has been deleted successfully" });
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: "internal server error!" })
-    }
-
-
-});
-// affect agent to  user 
-router.put("/agentUser/:iduser/:idagent", async (req, res) => {
+}
+// affecte agent to user
+exports.put = async (req, res) => {
     try {
         const user = await User.findByIdAndUpdate(
             req.params.iduser,
@@ -240,9 +212,9 @@ router.put("/agentUser/:iduser/:idagent", async (req, res) => {
         console.log(error);
         res.status(500).json({ message: "Internal server error!" });
     }
-});
+}
 // desaffecte agent to user
-router.put("/desaagentUser/:iduser/:idagent", async (req, res) => {
+exports.put = async (req, res) => {
     try {
         const user = await User.findByIdAndUpdate(
             req.params.iduser,
@@ -256,10 +228,17 @@ router.put("/desaagentUser/:iduser/:idagent", async (req, res) => {
         console.log(error);
         res.status(500).json({ message: "Internal server error!" });
     }
-});
+}
+// delete
+exports.delete = async (req, res) => {
+    try {
+        const users = await User.findByIdAndRemove(req.params.id);
+        res.json({ message: " user has been deleted successfully" });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "internal server error!" })
+    }
 
 
+}
 
-
-
-module.exports = router;
