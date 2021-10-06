@@ -7,7 +7,7 @@ const router = express.Router();
 const crypto=require('crypto')
 
 router.post("/reset", async (req, res) => {
-    const clientURL = "http://localhost:3000";
+    const clientURL = "http://localhost:4200";
   try {
     const user = await User.findOne({ email: req.body.email });
     if (!user) {
@@ -27,7 +27,7 @@ router.post("/reset", async (req, res) => {
     })
     console.log("token " + hash);
 
-    const link = `${clientURL}/passwordReset?token=${resetToken}&id=${user._id}`;
+    const link = `${clientURL}/#/newPass/${resetToken}/${user._id}`;
     const mailoption = {
       from: process.env.MAIL, // jsoner address
       to: "idoudihana06@gmail.com" , // list of receivers
@@ -35,7 +35,7 @@ router.post("/reset", async (req, res) => {
       html: link, // html body
     }
     const info = await Transporter.sendMail(mailoption)
-    res.json({ message: 'check your mail', userId , token});
+    res.json({ message: 'check your mail'});
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: 'internal server error' });
@@ -63,7 +63,7 @@ router.get("/:userId/:token", async (req, res) => {
     res.status(500).json({ message: 'internal server error' });
   }
 });
-router.post("/:userId/:token", async (req, res) => {
+router.patch("/:token/:userId", async (req, res) => {
     try {
         const user = await User.findOne({email : req.body.email});
         const {userId,token}=req.params;
@@ -77,11 +77,11 @@ router.post("/:userId/:token", async (req, res) => {
             userId: user._id,
             token: req.params.token,
         });
-        if (!token) return res.status(400).json("Invalid link or expired");
+        // if (!token) return res.status(400).json("Invalid link or expired");
         const hashpassword = await bcrypt.hash(req.body.password, 10);
    
         user.password = hashpassword;
-        res.json( user);
+        res.json({message:'password has been changed '});
     } catch (error) {
         res.json("An error occured");
         console.log(error);
