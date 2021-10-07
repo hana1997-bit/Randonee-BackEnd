@@ -65,8 +65,10 @@ router.get("/:userId/:token", async (req, res) => {
 });
 router.patch("/:token/:userId", async (req, res) => {
     try {
-        const user = await User.findOne({email : req.body.email});
-        const {userId,token}=req.params;
+        const user = await User.findOne({userId : req.body._id});
+        console.log('user' + user._id);
+       
+        const {userId,token}=req.body; console.log('userId' + req.body.userId);
       //  if is not exist
       if(user._id!=userId){
         res.json({message:"this id isn/'t exist"});
@@ -75,7 +77,7 @@ router.patch("/:token/:userId", async (req, res) => {
 
         const new_token = await Token.findOne({
             userId: user._id,
-            token: req.params.token,
+            token: req.body.token,
         });
         // if (!token) return res.status(400).json("Invalid link or expired");
         const hashpassword = await bcrypt.hash(req.body.password, 10);
