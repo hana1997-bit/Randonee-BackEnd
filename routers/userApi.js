@@ -18,7 +18,7 @@ const passport = require('passport');
 
 // get all user
 router.get('/users', async (req, res) => {
-    console.log(req.user);
+    
     try {
         const user = await User.find();
         res.json(user);
@@ -31,7 +31,7 @@ router.get('/users', async (req, res) => {
 //get user by id
 router.get('/users/:id', async (req, res) => {
   try {
-    const user = await User.findById(req.params.id);
+    const user = await User.findById(req.body.id);
     res.json(user);
   } catch (error) {
     console.log(error);
@@ -40,7 +40,7 @@ router.get('/users/:id', async (req, res) => {
 });
 const my_storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, './public/images')
+        cb(null, './public/imgs')
     },
 
     filename: (req, file, cb) => {
@@ -60,7 +60,7 @@ const fileFilterFunction = (req, file, cb) => {
     const file_extention = path.extname(file.originalname);
     const allowedExtentions = [".jpg", ".jpeg", ".png", ".gif"]
     if (!allowedExtentions.includes(file_extention)) {
-        return cb(new Error('Only images are allowed'))
+        return cb(new Error('Only imgs are allowed'))
     }
     cb(null, true)
 };
@@ -69,29 +69,30 @@ const upload = multer({ storage: my_storage, fileFilter: fileFilterFunction })
 
 // creat all user
 router.post('/singup',upload.single('file'), async (req, res) => {
-    console.log("hhh");
     try {
         const user = await User.find({ email: req.body.email });
-        console.log(user);
+        // console.log(user);
         const hashpassword = await bcrypt.hash(req.body.password, 10);
-        console.log(hashpassword);
+        // console.log(hashpassword);
         if (!user) {
             res.json({ message: "mail existe" })
         }
         // const token = JWT.sign({ id: user._id }, JWTSecret);
         else {
-            if (req.file) {
+            console.log(req.body.img + "req.file");
+            if (req.body.img) {
                 const creatUser = await User.create({
                     firstName: req.body.firstName,
                     lastName: req.body.lastName,
                     age: req.body.age,
                     email: req.body.email,
                     phone: req.body.phone,
-                    image: req.file.path,
+                    image: req.body.img,
                     password: hashpassword,
                     role: req.body.role
-                }); res.json(creatUser);
-
+                }); 
+                console.log("1");
+res.json(creatUser);
             }
             else {
                 const creatUser = await User.create({
@@ -102,7 +103,9 @@ router.post('/singup',upload.single('file'), async (req, res) => {
                     phone: req.body.phone,
                     password: hashpassword,
                     role: req.body.role
-                }); res.json(creatUser);
+                
+            }); console.log("2");
+                res.json(creatUser);
 
             }
 
@@ -161,7 +164,7 @@ router.put('/users/:id', upload.single('file'), async (req, res) => {
                     age: req.body.age,
                     email: req.body.email,
                     phone: req.body.phone,
-                    image: req.file.path,
+                    img: req.file.path,
                     password: hashpassword,
                     role: req.body.role
                 },
@@ -169,9 +172,9 @@ router.put('/users/:id', upload.single('file'), async (req, res) => {
                     new: true,
                 }
             );
-            // supprimer l'image
+            // supprimer l'img
             try {
-                fs.unlinkSync(userCompte.image);
+                fs.unlinkSync(userCompte.img);
                 //file removed
             } catch (err) {
                 console.error(err);
@@ -217,6 +220,7 @@ router.put('/users/:id', upload.single('file'), async (req, res) => {
 router.delete('/users/:id',async (req, res) => {
     try {
         const users = await User.findByIdAndRemove(req.params.id);
+        console.log(users);
         res.json({ message: " user has been deleted successfully" });
     } catch (error) {
         console.log(error);
