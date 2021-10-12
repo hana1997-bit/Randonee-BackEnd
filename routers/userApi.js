@@ -40,7 +40,7 @@ router.get('/users/:id', async (req, res) => {
 });
 const my_storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, './public/imgs')
+        cb(null, './public/images')
     },
 
     filename: (req, file, cb) => {
@@ -68,7 +68,7 @@ const fileFilterFunction = (req, file, cb) => {
 const upload = multer({ storage: my_storage, fileFilter: fileFilterFunction })
 
 // creat all user
-router.post('/singup',upload.single('file'), async (req, res) => {
+router.post('/singup',upload.single('image'), async (req, res) => {
     try {
         const user = await User.find({ email: req.body.email });
         // console.log(user);
@@ -79,15 +79,16 @@ router.post('/singup',upload.single('file'), async (req, res) => {
         }
         // const token = JWT.sign({ id: user._id }, JWTSecret);
         else {
-            console.log(req.body.img + "req.file");
-            if (req.body.img) {
+            console.log(req.file);
+            // console.log(req.body.img + "req.file");
+            if (req.file) {
                 const creatUser = await User.create({
                     firstName: req.body.firstName,
                     lastName: req.body.lastName,
                     age: req.body.age,
                     email: req.body.email,
                     phone: req.body.phone,
-                    image: req.body.img,
+                    image: req.file.path,
                     password: hashpassword,
                     role: req.body.role
                 }); 
