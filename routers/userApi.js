@@ -31,7 +31,7 @@ router.get('/users', async (req, res) => {
 //get user by id
 router.get('/users/:id', async (req, res) => {
   try {
-    const user = await User.findById(req.body.id);
+    const user = await User.findById(req.params.id);
     res.json(user);
   } catch (error) {
     console.log(error);
@@ -46,14 +46,15 @@ const my_storage = multer.diskStorage({
     filename: (req, file, cb) => {
         const file_extention = path.extname(file.originalname);
         const uniqueSuffix = Date.now() + file_extention
-        console.log(file_extention)
         cb(null, file.fieldname + '-' + uniqueSuffix)
+        console.log(uniqueSuffix);
     },
 
     limits: {
         fileSize: 1024 * 1024
     }
 });
+
 
 // file filter function 
 const fileFilterFunction = (req, file, cb) => {
@@ -152,12 +153,15 @@ router.post('/singin',async (req, res) => {
 })
 
 //update user
-router.put('/users/:id', upload.single('file'), async (req, res) => {
+router.put('/users/:id', upload.single('image'), async (req, res) => {
     try {
         const hashpassword = await bcrypt.hash(req.body.password, 10);
         const userCompte = await User.findById(req.params.id);
+       
         if (userCompte && req.file) {
             const user = await User.findByIdAndUpdate(
+                 // fs.unlink("userCompte.image"),
+                // // console.log("fs " + fs.unlinkSync(userCompte.image)),
                 req.params.id,
                 {
                     firstName: req.body.firstName,
@@ -175,7 +179,8 @@ router.put('/users/:id', upload.single('file'), async (req, res) => {
             );
             // supprimer l'img
             try {
-                fs.unlinkSync(userCompte.img);
+                // console.log(+ 'ssss');
+                fs.unlink(`C:/Users/idoud/OneDrive/Bureau/Nouveau dossier/NodeApp/${userCompte.image}`);
                 //file removed
             } catch (err) {
                 console.error(err);
@@ -184,7 +189,7 @@ router.put('/users/:id', upload.single('file'), async (req, res) => {
                 message: "user has been updated .",
                 newUserInfos: user,
             });
-        } else if (UserCompte && req.file == undefined) {
+        } else if (userCompte && req.file == undefined) {
             const user = await User.findByIdAndUpdate(
                 req.params.id,
                 {
