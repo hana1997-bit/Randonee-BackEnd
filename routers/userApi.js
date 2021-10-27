@@ -18,7 +18,7 @@ const passport = require('passport');
 
 // get all user
 router.get('/users', async (req, res) => {
-    
+
     try {
         const user = await User.find();
         res.json(user);
@@ -30,46 +30,46 @@ router.get('/users', async (req, res) => {
 
 //get user by id
 router.get('/users/:id', async (req, res) => {
-  try {
-    const user = await User.findById(req.params.id);
-    res.json(user);
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "no one have this id" })
-  }
-});
-const my_storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, './public/images')
-    },
-
-    filename: (req, file, cb) => {
-        const file_extention = path.extname(file.originalname);
-        const uniqueSuffix = Date.now() + file_extention
-        cb(null, file.fieldname + '-' + uniqueSuffix)
-        console.log(uniqueSuffix);
-    },
-
-    limits: {
-        fileSize: 1024 * 1024
+    try {
+        const user = await User.findById(req.params.id);
+        res.json(user);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "no one have this id" })
     }
 });
+// const my_storage = multer.diskStorage({
+//     destination: (req, file, cb) => {
+//         cb(null, './public/images')
+//     },
+
+//     filename: (req, file, cb) => {
+//         const file_extention = path.extname(file.originalname);
+//         const uniqueSuffix = Date.now() + file_extention
+//         cb(null, file.fieldname + '-' + uniqueSuffix)
+//         console.log(uniqueSuffix);
+//     },
+
+//     limits: {
+//         fileSize: 1024 * 1024
+//     }
+// });
 
 
 // file filter function 
-const fileFilterFunction = (req, file, cb) => {
-    const file_extention = path.extname(file.originalname);
-    const allowedExtentions = [".jpg", ".jpeg", ".png", ".gif",".PNG",".JPG"]
-    if (!allowedExtentions.includes(file_extention)) {
-        return cb(new Error('Only imgs are allowed'))
-    }
-    cb(null, true)
-};
+// const fileFilterFunction = (req, file, cb) => {
+//     const file_extention = path.extname(file.originalname);
+//     const allowedExtentions = [".jpg", ".jpeg", ".png", ".gif",".PNG",".JPG"]
+//     if (!allowedExtentions.includes(file_extention)) {
+//         return cb(new Error('Only imgs are allowed'))
+//     }
+//     cb(null, true)
+// };
 // 2.0 create upload
-const upload = multer({ storage: my_storage, fileFilter: fileFilterFunction })
+// const upload = multer({ storage: my_storage, fileFilter: fileFilterFunction })
 
 // creat all user
-router.post('/singup',upload.single('image'), async (req, res) => {
+router.post('/singup', async (req, res) => {
     try {
         const user = await User.find({ email: req.body.email });
         // console.log(user);
@@ -80,38 +80,46 @@ router.post('/singup',upload.single('image'), async (req, res) => {
         }
         // const token = JWT.sign({ id: user._id }, JWTSecret);
         else {
-            console.log(req.file);
-            // console.log(req.body.img + "req.file");
-            if (req.file) {
-                const creatUser = await User.create({
-                    firstName: req.body.firstName,
-                    lastName: req.body.lastName,
-                    age: req.body.age,
-                    email: req.body.email,
-                    phone: req.body.phone,
-                    image: req.file.path,
-                    password: hashpassword,
-                    role: req.body.role
-                }); 
-                console.log("1");
-res.json(creatUser);
-            }
-            else {
-                const creatUser = await User.create({
-                    firstName: req.body.firstName,
-                    lastName: req.body.lastName,
-                    age: req.body.age,
-                    email: req.body.email,
-                    phone: req.body.phone,
-                    password: hashpassword,
-                    role: req.body.role
-                
-            }); console.log("2");
-                res.json(creatUser);
-
-            }
-
+            const creatUser = await User.create({
+                firstName: req.body.firstName,
+                lastName: req.body.lastName,
+                email: req.body.email,
+                phone: req.body.phone,
+                password: hashpassword,
+                role: req.body.role
+            });
+            res.json(creatUser);
         }
+        // console.log(req.file);
+        // console.log(req.body.img + "req.file");
+        //             if (req.file) {
+        //                 const creatUser = await User.create({
+        //                     firstName: req.body.firstName,
+        //                     lastName: req.body.lastName,
+        //                     email: req.body.email,
+        //                     phone: req.body.phone,
+        //                     password: hashpassword,
+        //                     role: req.body.role
+        //                 }); 
+        //                 console.log("1");
+        // res.json(creatUser);
+        // }
+        // else {
+        //     const creatUser = await User.create({
+        //         firstName: req.body.firstName,
+        //         lastName: req.body.lastName,
+        //         age: req.body.age,
+        //         email: req.body.email,
+        //         phone: req.body.phone,
+        //         password: hashpassword,
+        //         role: req.body.role
+
+        // }); console.log("2");
+        //     res.json(creatUser);
+
+        //     }
+
+        // }
 
 
     } catch (error) {
@@ -120,11 +128,13 @@ res.json(creatUser);
     }
 })
 // singin user
-router.post('/singin',async (req, res) => {
+router.post('/singin', async (req, res) => {
     try {
         const user = await User.findOne({ email: req.body.email });
         if (user) {
             const cmp = await bcrypt.compare(req.body.password, user.password);
+            // console.log(req.body.password);
+            // console.log(user.password);
             console.log(cmp);
             if (cmp) {
                 // creat jwt token
@@ -153,52 +163,52 @@ router.post('/singin',async (req, res) => {
 })
 
 //update user
-router.put('/users/:id', upload.single('image'), async (req, res) => {
+router.put('/users/:id', async (req, res) => {
     try {
-        const hashpassword = await bcrypt.hash(req.body.password, 10);
+        // const hashpassword = await bcrypt.hash(req.body.password, 10);
         const userCompte = await User.findById(req.params.id);
-       
-        if (userCompte && req.file) {
+        console.log(userCompte.password);
+        // if (userCompte && req.file) {
+        //     const user = await User.findByIdAndUpdate(
+        //         // fs.unlink("userCompte.image"),
+        //         // // console.log("fs " + fs.unlinkSync(userCompte.image)),
+        //         req.params.id,
+        //         {
+        //             firstName: req.body.firstName,
+        //             lastName: req.body.lastName,
+        //             age: req.body.age,
+        //             email: req.body.email,
+        //             phone: req.body.phone,
+        //             img: req.file.path,
+        //             password: hashpassword,
+        //             role: req.body.role
+        //         },
+        //         {
+        //             new: true,
+        //         }
+        //     );
+        //     // supprimer l'img
+        //     try {
+        //         // console.log(+ 'ssss');
+        //         fs.unlink(`C:/Users/idoud/OneDrive/Bureau/Nouveau dossier/NodeApp/${userCompte.image}`);
+        //         //file removed
+        //     } catch (err) {
+        //         console.error(err);
+        //     }
+        //     res.json({
+        //         message: "user has been updated .",
+        //         newUserInfos: user,
+        //     });
+        // } 
+        if (userCompte) {
             const user = await User.findByIdAndUpdate(
-                 // fs.unlink("userCompte.image"),
-                // // console.log("fs " + fs.unlinkSync(userCompte.image)),
                 req.params.id,
                 {
                     firstName: req.body.firstName,
                     lastName: req.body.lastName,
-                    age: req.body.age,
                     email: req.body.email,
                     phone: req.body.phone,
-                    img: req.file.path,
-                    password: hashpassword,
-                    role: req.body.role
-                },
-                {
-                    new: true,
-                }
-            );
-            // supprimer l'img
-            try {
-                // console.log(+ 'ssss');
-                fs.unlink(`C:/Users/idoud/OneDrive/Bureau/Nouveau dossier/NodeApp/${userCompte.image}`);
-                //file removed
-            } catch (err) {
-                console.error(err);
-            }
-            res.json({
-                message: "user has been updated .",
-                newUserInfos: user,
-            });
-        } else if (userCompte && req.file == undefined) {
-            const user = await User.findByIdAndUpdate(
-                req.params.id,
-                {
-                    firstName: req.body.firstName,
-                    lastName: req.body.lastName,
-                    age: req.body.age,
-                    email: req.body.email,
-                    phone: req.body.phone,
-                    password: hashpassword,
+                    password: userCompte.password,
                     role: req.body.role
                 },
                 {
@@ -220,10 +230,20 @@ router.put('/users/:id', upload.single('image'), async (req, res) => {
     }
 });
 
+// change pass
+// router.put('/pass/:id', async (req, res) => {
+//     try {
+
+//     } catch (error) {
+//         console.log(error);
+//         res.status(500).json({ message: "Internal server error!" });
+//     }
+// })
+
 
 
 //delete user
-router.delete('/users/:id',async (req, res) => {
+router.delete('/users/:id', async (req, res) => {
     try {
         const users = await User.findByIdAndRemove(req.params.id);
         console.log(users);

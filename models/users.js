@@ -2,10 +2,6 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 const userSchema = new Schema({
-   image: {
-      type: String,
-      
-   },
    firstName: {
       type: String,
       required: true,
@@ -25,10 +21,6 @@ const userSchema = new Schema({
    },
    password: {
       type: String,
-      required: true,
-   },
-   age: {
-      type: Number,
       required: true,
    },
    role: {
