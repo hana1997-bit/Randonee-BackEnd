@@ -36,6 +36,9 @@ app.use('',agent);
 //reset Api
 const reset = require('./routers/ResetPassApi');
 app.use('',reset);
+//modifier Api
+const modifier = require('./routers/mofifierPass');
+app.use('',modifier);
 //reserve Api
 const reserve = require('./routers/reserveApi');
 app.use('',reserve);

@@ -230,18 +230,6 @@ router.put('/users/:id', async (req, res) => {
     }
 });
 
-// change pass
-// router.put('/pass/:id', async (req, res) => {
-//     try {
-
-//     } catch (error) {
-//         console.log(error);
-//         res.status(500).json({ message: "Internal server error!" });
-//     }
-// })
-
-
-
 //delete user
 router.delete('/users/:id', async (req, res) => {
     try {
