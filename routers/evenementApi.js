@@ -2,12 +2,14 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const Agent = require('../models/evenement');
+const User = require('../models/users');
 const path = require('path');
+const fs = require('fs');
 
 // get all agents
 router.get('/agents', async (req, res) => {
     try {
-        const agent = await Agent.find().populate('agents');;
+        const agent = await Agent.find();
         res.json(agent);
     } catch (error) {
         console.log(error);
@@ -35,9 +37,10 @@ const my_storage = multer.diskStorage({
 
     filename: (req, file, cb) => {
         const file_extention = path.extname(file.originalname);
-        const uniqueSuffix = Date.now() + file_extention
-        console.log(file_extention)
-        cb(null, file.fieldname + '-' + uniqueSuffix)
+        // const uniqueSuffix = Date.now() + file_extention
+        // console.log(file_extention)
+        cb(null, Date.now() + '_' + file.originalname)
+
     },
 
     limits: {
@@ -48,7 +51,7 @@ const my_storage = multer.diskStorage({
 // file filter function 
 const fileFilterFunction = (req, file, cb) => {
     const file_extention = path.extname(file.originalname);
-    const allowedExtentions = [".jpg", ".jpeg", ".png", ".gif"]
+    const allowedExtentions = [".jpg", ".jpeg", ".png", ".gif", ".PNG"]
     if (!allowedExtentions.includes(file_extention)) {
         return cb(new Error('Only images are allowed'))
     }
@@ -58,82 +61,73 @@ const fileFilterFunction = (req, file, cb) => {
 const upload = multer({ storage: my_storage, fileFilter: fileFilterFunction })
 
 // creat events
-router.post('/creation', upload.array('files'), async (req, res) => {
+router.post('/creation', upload.array('imgs'), async (req, res) => {
     try {
-        if (req.file) {
-            const creatEvent = await Agent.create({
-                evenement: req.body.evenement,
-                localisation: req.body.localisation,
-                durée: req.body.durée,
-                phone: req.body.phone,
-                images: req.file.path
-            }); res.json(creatEvent);
-
-        }
-        else {
-            const creatEvent = await Agent.create({
-                evenement: req.body.evenement,
-                localisation: req.body.localisation,
-                durée: req.body.durée,
-                phone: req.body.phone
-            }); res.json(creatEvent);
-
-        }
+        // if (req.file) {
+        // console.log(req.file.path);
+        let imgs = []
+        console.log(req.files)
+        req.files.forEach(file => {
+            imgs.push(file.filename)
+        });
+        const creatEvent = await Agent.create({
+            ...req.body,
+            imgs
+        });
+         res.json(creatEvent);
     } catch (error) {
         console.log(error);
-        res.status(500).json({ message: "internal server error!" })
+        return res.status(500).json({ message: "internal server error!" })
     }
 });
 //update Agent
-router.put('/agents/:id', upload.array('files'), async (req, res) => {
+router.put('/agents/:id', upload.array('imgs', 4), async (req, res) => {
     try {
-        const eventId = await Agent.findById(req.params.id);
-        if (eventId & req.file) {
+        
+        const eventId = await Agent.findById(req.params.id,req.body);
+        let imgs = eventId.imgs;
+        // console.log(imgs);
+        if (req.files) {   
+        req.files.forEach(file => {
+            imgs.push(file.filename)
+        });
+        }
+        // console.log(eventId + "id");
+        // if (eventId) {
             const event = await Agent.findByIdAndUpdate(
                 req.params.id,
                 {
+                    nombre: req.body.nombre,
                     evenement: req.body.evenement,
                     localisation: req.body.localisation,
-                    durée: req.body.durée,
+                    temps: req.body.temps,
                     phone: req.body.phone,
-                    images: req.file.path
+                    prix: req.body.prix,
+                    imgs:imgs,
+                    user:req.body.user,
                 },
                 {
                     new: true,
                 }
             );
             // supprimer l'image
-            try {
-                fs.unlinkSync(eventId.images);
-                //file removed
-            } catch (err) {
-                console.error(err);
-            }
+            // try {
+            //     fs.unlinkSync(eventId.images);
+            //     //file removed
+            // } catch (err) {
+            //     console.error(err);
+            // }
             res.json({
                 message: "event has been updated ."
             });
-        } else if (eventId && req.file == undefined) {
-            const event = await Agent.findByIdAndUpdate(
-                req.params.id,
-                {
-                    evenement: req.body.evenement,
-                    localisation: req.body.localisation,
-                    durée: req.body.durée,
-                    phone: req.body.phone
-                },
-                {
-                    new: true,
-                }
-            );
-            res.status(200).json({
-                user: user,
-            });
-        } else {
-            res.status(404).json({
-                message:
-                    " there is no event with this ID to update .please try again .",
-            });
-        }
+        // }
+         
+        // else {
+        //     res.status(404).json({
+        //         message:
+        //             " there is no event with this ID to update .please try again .",
+        //     });
+        // }
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: "Internal server error!" });

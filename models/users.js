@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 const userSchema = new Schema({
+
    firstName: {
       type: String,
       required: true,
@@ -10,10 +11,10 @@ const userSchema = new Schema({
       type: String,
       required: true,
    },
-   phone: {
-      type: Number,
-      required: true
-   },
+   // phone: {
+   //    type: Number,
+   //    required: true
+   // },
    email: {
       type: String,
       required: true,
@@ -26,7 +27,7 @@ const userSchema = new Schema({
    role: {
       type: String,
       required: true,
-      default:"admin"
+      default:"user"
    },
 }, {
    versionKey: false, // paramétre pour mongodb , désactivier _v on mongoDB

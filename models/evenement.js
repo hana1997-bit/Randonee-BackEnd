@@ -1,14 +1,16 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 const agentSchema = new Schema({
-   agent: {
-      type: mongoose.Schema.Types.ObjectId,
+   user: {
+      type: Schema.Types.ObjectId,
       ref: "User",
-      required: true,
    },
-   images: {
-      type: String,
-      required: true,
+   nombre:{
+      type:Number,
+      require:true,
+   },
+   imgs: {
+      type: Array,
    },
    evenement: {
       type: String,
@@ -18,7 +20,11 @@ const agentSchema = new Schema({
       type: String,
       required: true,
    },
-   durée: {
+   temps: {
+      type: Number,
+      required: true,
+   },
+   prix: {
       type: Number,
       required: true,
    },

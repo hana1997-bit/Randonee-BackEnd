@@ -25,7 +25,7 @@ app.use(express.urlencoded({ extended: true }));
 // cors
 app.use(cors());
 // static folder config with express
-app.use('/public', express.static('public'));
+app.use('/public/', express.static('public/images'));
 
 // user Api
 const user = require('./routers/userApi');

@@ -10,15 +10,10 @@ const fs = require('fs');
 const Transporter = require('../utils/transporter');
 //use model
 const User = require('../models/users');
-
 const passport = require('passport');
-
-
-// const { getMaxListeners } = require('process');
 
 // get all user
 router.get('/users', async (req, res) => {
-
     try {
         const user = await User.find();
         res.json(user);
@@ -38,43 +33,12 @@ router.get('/users/:id', async (req, res) => {
         res.status(500).json({ message: "no one have this id" })
     }
 });
-// const my_storage = multer.diskStorage({
-//     destination: (req, file, cb) => {
-//         cb(null, './public/images')
-//     },
-
-//     filename: (req, file, cb) => {
-//         const file_extention = path.extname(file.originalname);
-//         const uniqueSuffix = Date.now() + file_extention
-//         cb(null, file.fieldname + '-' + uniqueSuffix)
-//         console.log(uniqueSuffix);
-//     },
-
-//     limits: {
-//         fileSize: 1024 * 1024
-//     }
-// });
-
-
-// file filter function 
-// const fileFilterFunction = (req, file, cb) => {
-//     const file_extention = path.extname(file.originalname);
-//     const allowedExtentions = [".jpg", ".jpeg", ".png", ".gif",".PNG",".JPG"]
-//     if (!allowedExtentions.includes(file_extention)) {
-//         return cb(new Error('Only imgs are allowed'))
-//     }
-//     cb(null, true)
-// };
-// 2.0 create upload
-// const upload = multer({ storage: my_storage, fileFilter: fileFilterFunction })
 
 // creat all user
 router.post('/singup', async (req, res) => {
     try {
         const user = await User.find({ email: req.body.email });
-        // console.log(user);
         const hashpassword = await bcrypt.hash(req.body.password, 10);
-        // console.log(hashpassword);
         if (!user) {
             res.json({ message: "mail existe" })
         }
@@ -90,38 +54,7 @@ router.post('/singup', async (req, res) => {
             });
             res.json(creatUser);
         }
-        // console.log(req.file);
-        // console.log(req.body.img + "req.file");
-        //             if (req.file) {
-        //                 const creatUser = await User.create({
-        //                     firstName: req.body.firstName,
-        //                     lastName: req.body.lastName,
-        //                     email: req.body.email,
-        //                     phone: req.body.phone,
-        //                     password: hashpassword,
-        //                     role: req.body.role
-        //                 }); 
-        //                 console.log("1");
-        // res.json(creatUser);
-        // }
-        // else {
-        //     const creatUser = await User.create({
-        //         firstName: req.body.firstName,
-        //         lastName: req.body.lastName,
-        //         age: req.body.age,
-        //         email: req.body.email,
-        //         phone: req.body.phone,
-        //         password: hashpassword,
-        //         role: req.body.role
-
-        // }); console.log("2");
-        //     res.json(creatUser);
-
-        //     }
-
-        // }
-
-
+       
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: "internal server error!" })
@@ -133,8 +66,6 @@ router.post('/singin', async (req, res) => {
         const user = await User.findOne({ email: req.body.email });
         if (user) {
             const cmp = await bcrypt.compare(req.body.password, user.password);
-            // console.log(req.body.password);
-            // console.log(user.password);
             console.log(cmp);
             if (cmp) {
                 // creat jwt token
@@ -145,7 +76,7 @@ router.post('/singin', async (req, res) => {
                     lastName: user.lastName
                 };
                 const token = jwt.sign(tokenData, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.ACCESS_TOKEN_EXPIRATION });
-                res.json({ message: "authetification successful", token: token });
+                res.json({ message: "authetification successful", token: token , _id:user._id});
             }
             else {
                 res.json({ message: "wrong email or password" });

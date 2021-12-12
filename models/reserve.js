@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 const reserveSchema = new Schema({
-   user: {
+   event: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Agent",
       required: true,
